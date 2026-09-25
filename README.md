@@ -9,6 +9,8 @@ It's a side project from my own garden room (about 15 m², six WLED strips, one
 white strip), so it isn't a polished product. But it works, and most of the value
 is in the things below that took a while to find.
 
+![How the lights are driven: one script and schedule, WiFi to the WLED strips, Bluetooth via Home Assistant and an ESP32 proxy to the white strip](docs/img/setup-diagram.png)
+
 ## What's in here
 
 | Path | What it is |
@@ -54,6 +56,8 @@ roughly 43 (cool white) to 79 (very warm). My schedule asked for 90 to 255, so
 brightness**. Only the colour ever changed. `status` showed every unit sitting
 on its cap.
 
+![Before: every phase from wake to evening came out at 100% because the power limiter capped it. After: the phases range from 16% to 100%](docs/img/abl-before-after.png)
+
 So `gardenroom.py` now treats `bri` in `schedule.json` as a *share of what each
 unit can really deliver* at that colour (255 = just under its limiter). It reads
 each unit's `/json/cfg` and works out the raw value per unit, so the phases
@@ -89,6 +93,8 @@ it into Home Assistant:
 - give the ESP32 **good WiFi**. Mine joined a distant mesh node at -83 dBm and
   every Bluetooth connect timed out through the lag. Putting the nearby access
   point first in the config fixed it.
+
+![The ESP32 Bluetooth proxy online in the ESPHome dashboard](docs/img/esphome-proxy.png)
 
 Then copy `ha_webhook.example.json` to `ha_webhook.json` with a long random id,
 put the same id in `home-assistant/automation.banlanx_webhook.yaml`, and add
