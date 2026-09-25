@@ -1,0 +1,5 @@
+devices.json
+ha_webhook.json
+esphome/secrets.yaml
+__pycache__/
+*.bak*

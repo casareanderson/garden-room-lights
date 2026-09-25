@@ -1,0 +1,81 @@
+{
+  "_comment": "Phases are evaluated in order against the local (Europe/London) wall clock; the first window containing 'now' wins, and the windows must tile the whole day. kelvin is RENDERED to RGB because these strips have no white channel. bri is a SHARE of what each WLED unit can really deliver (255 = its ABL ceiling for that colour; gardenroom.py converts per unit), NOT raw WLED bri - raw values above ~45-80 all hit the power limiter and looked identical. bri_white is the BanlanX SP630E (mono white, via HA): the room's only real white, so full for work, 0 = off in the evening so it adds no blue-ish light before bed. 'working': true marks the daytime task-light tiers that `gardenroom.py white` may land on. Values follow research/FINDINGS.md (EN 12464-1 + Brown et al. 2020); edit freely, the script has no times baked in.",
+  "timezone": "Europe/London",
+  "phases": [
+    {
+      "name": "off",
+      "from": "00:00",
+      "to": "06:30",
+      "power": false,
+      "kelvin": 2000,
+      "bri": 0,
+      "bri_white": 0
+    },
+    {
+      "name": "wake",
+      "from": "06:30",
+      "to": "08:30",
+      "power": true,
+      "kelvin": 3000,
+      "bri": 90,
+      "bri_white": 90
+    },
+    {
+      "name": "work",
+      "from": "08:30",
+      "to": "12:00",
+      "power": true,
+      "kelvin": 6000,
+      "bri": 255,
+      "working": true,
+      "bri_white": 255
+    },
+    {
+      "name": "midday",
+      "from": "12:00",
+      "to": "14:00",
+      "power": true,
+      "kelvin": 5000,
+      "bri": 255,
+      "working": true,
+      "bri_white": 255
+    },
+    {
+      "name": "afternoon",
+      "from": "14:00",
+      "to": "17:00",
+      "power": true,
+      "kelvin": 4000,
+      "bri": 230,
+      "working": true,
+      "bri_white": 230
+    },
+    {
+      "name": "winddown",
+      "from": "17:00",
+      "to": "19:30",
+      "power": true,
+      "kelvin": 3200,
+      "bri": 170,
+      "bri_white": 90
+    },
+    {
+      "name": "evening",
+      "from": "19:30",
+      "to": "22:30",
+      "power": true,
+      "kelvin": 2700,
+      "bri": 110,
+      "bri_white": 0
+    },
+    {
+      "name": "night",
+      "from": "22:30",
+      "to": "24:00",
+      "power": true,
+      "kelvin": 2000,
+      "bri": 40,
+      "bri_white": 0
+    }
+  ]
+}

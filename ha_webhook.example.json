@@ -1,0 +1,6 @@
+{
+  "_comment": "Optional. Copy to ha_webhook.json to also drive a light WLED can't reach (here a Bluetooth-only BanlanX SP630E via Home Assistant). Every apply/white/off POSTs {phase, power, bri, kelvin} to this local-only webhook; home-assistant/automation.banlanx_webhook.yaml applies it. bri comes from the phase's bri_white. Delete the file to stop.",
+  "key": "sp630e",
+  "entity": "light.sp630e_strip",
+  "url": "http://homeassistant.local:8123/api/webhook/CHANGE-ME-to-a-long-random-id"
+}
