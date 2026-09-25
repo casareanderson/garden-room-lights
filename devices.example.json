@@ -1,0 +1,7 @@
+{
+  "_comment": "Copy to devices.json. The MAC is the identity and never moves; `ip` is only the last known address. If an IP stops answering, gardenroom.py looks the MAC up in the router's DHCP leases (optional, see GARDENROOM_ROUTER) and `gardenroom.py resolve` rewrites this file.",
+  "devices": [
+    {"key": "gr1", "name": "Strip 1", "mac": "aa:bb:cc:00:00:01", "ip": "192.168.1.50", "entity": "light.strip_1"},
+    {"key": "gr2", "name": "Strip 2", "mac": "aa:bb:cc:00:00:02", "ip": "192.168.1.51", "entity": "light.strip_2"}
+  ]
+}

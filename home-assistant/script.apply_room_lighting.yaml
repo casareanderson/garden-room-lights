@@ -1,0 +1,97 @@
+
+# ── Room lighting ──────────────────────────────────────────────────────────
+# Drives EVERY light in an area to one colour/brightness, whatever brand it is
+# (WLED, Govee, WiZ, Tuya). Lives here rather than in an external script so it
+# needs no API token and survives restarts.
+#
+# Two rules that matter:
+#   * light.*_segment_* children are skipped. They report a nominal white
+#     rather than the device's real colour, and the parent entity already
+#     drives the whole device.
+#   * Only lights that are ALREADY ON are touched, unless include_off is true.
+#     A clock tick should not light up the whole house.
+# Colour temperature is used where the light supports it (a truer white); RGB
+# is the fallback, and brightness-only lights just get the brightness.
+apply_room_lighting:
+  alias: Apply room lighting
+  icon: mdi:theme-light-dark
+  mode: queued
+  max: 10
+  fields:
+    area:
+      description: HA area id, e.g. office
+      required: true
+      selector:
+        text:
+    kelvin:
+      description: Target colour temperature
+      required: true
+      selector:
+        number: {min: 1500, max: 8000, step: 50}
+    brightness:
+      description: Target brightness 0-255
+      required: true
+      selector:
+        number: {min: 0, max: 255, step: 1}
+    include_off:
+      description: Also switch on lights that are currently off
+      required: false
+      selector:
+        boolean:
+  sequence:
+    - variables:
+        targets: >-
+          {% set ns = namespace(o=[]) %}
+          {% for e in area_entities(area) if e.startswith('light.') %}
+            {% if '_segment_' not in e and states(e) not in ['unavailable','unknown'] %}
+              {% if include_off | default(false) or is_state(e, 'on') %}
+                {% set ns.o = ns.o + [e] %}
+              {% endif %}
+            {% endif %}
+          {% endfor %}
+          {{ ns.o }}
+    - repeat:
+        for_each: "{{ targets }}"
+        sequence:
+          - variables:
+              modes: "{{ state_attr(repeat.item, 'supported_color_modes') | default([], true) }}"
+              lo: "{{ state_attr(repeat.item, 'min_color_temp_kelvin') | default(2000, true) }}"
+              hi: "{{ state_attr(repeat.item, 'max_color_temp_kelvin') | default(6535, true) }}"
+          - choose:
+              # Real colour-temperature support — the best white this light can make.
+              - conditions: "{{ 'color_temp' in modes }}"
+                sequence:
+                  - action: light.turn_on
+                    target: {entity_id: "{{ repeat.item }}"}
+                    data:
+                      brightness: "{{ brightness | int }}"
+                      color_temp_kelvin: "{{ [[kelvin | int, lo | int] | max, hi | int] | min }}"
+              # No white channel — approximate the Kelvin with an RGB mix.
+              - conditions: "{{ modes | select('in', ['rgb','rgbw','rgbww','hs','xy']) | list | count > 0 }}"
+                sequence:
+                  - action: light.turn_on
+                    target: {entity_id: "{{ repeat.item }}"}
+                    data:
+                      brightness: "{{ brightness | int }}"
+                      rgb_color: >-
+                        {% set t = (kelvin | float) / 100 %}
+                        {% if t <= 66 %}
+                          {% set r = 255 %}
+                          {% set g = (99.4708025861 * log(t) - 161.1195681661) %}
+                          {% set b = 255 if t >= 66 else (0 if t <= 19 else (138.5177312231 * log(t - 10) - 305.0447927307)) %}
+                        {% else %}
+                          {% set r = 329.698727446 * ((t - 60) ** -0.1332047592) %}
+                          {% set g = 288.1221695283 * ((t - 60) ** -0.0755148492) %}
+                          {% set b = 255 %}
+                        {% endif %}
+                        {{ [ [[r|round|int,0]|max,255]|min, [[g|round|int,0]|max,255]|min, [[b|round|int,0]|max,255]|min ] }}
+              # Dimmable only.
+              - conditions: "{{ 'brightness' in modes }}"
+                sequence:
+                  - action: light.turn_on
+                    target: {entity_id: "{{ repeat.item }}"}
+                    data:
+                      brightness: "{{ brightness | int }}"
+            default:
+              - action: light.turn_on
+                target: {entity_id: "{{ repeat.item }}"}

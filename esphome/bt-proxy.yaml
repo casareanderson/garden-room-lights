@@ -1,0 +1,65 @@
+# ESPHome Bluetooth proxy: puts a BLE radio next to Bluetooth-only light
+# controllers (here a BanlanX SP630E) and relays it to Home Assistant.
+#
+# Any plain ESP32 dev board works (an ESP8266 has no Bluetooth). First flash
+# over USB from https://web.esphome.io, then OTA from the ESPHome dashboard.
+# Put it within ~5 m of the controller AND somewhere with decent WiFi: a weak
+# link here shows up as Bluetooth connect timeouts in HA, not as a WiFi error.
+#
+# After flashing, HA discovers the node, the `bluetooth` integration appears,
+# and UniLED (HACS) discovers the SP630E and offers a config flow.
+
+esphome:
+  name: garden-bt-proxy
+  friendly_name: Garden Room BT Proxy
+
+esp32:
+  board: esp32dev
+  framework:
+    type: esp-idf          # esp-idf, not arduino — far more stable BLE
+
+logger:
+api:
+  encryption:
+    key: !secret api_encryption_key
+ota:
+  - platform: esphome
+    password: !secret ota_password
+
+wifi:
+  # Put the AP nearest the board first. Mine latched onto a far mesh node at
+  # -83 dBm and the Bluetooth link kept timing out until the garden AP was
+  # given priority.
+  networks:
+    - ssid: !secret wifi_ssid_near
+      password: !secret wifi_password
+      priority: 10
+    - ssid: !secret wifi_ssid
+      password: !secret wifi_password
+      priority: 0
+  # Fallback AP so a lost association is recoverable without a trip outside.
+  ap:
+    ssid: "BT Proxy Fallback"
+    password: !secret fallback_password
+
+captive_portal:
+
+esp32_ble_tracker:
+  scan_parameters:
+    interval: 1100ms
+    window: 1100ms
+    active: true
+
+bluetooth_proxy:
+  active: true             # REQUIRED. UniLED opens a GATT connection to the
+                           # SP630E; passive advertisement scanning is not enough.
+
+# Handy for diagnosing "is it the radio or the strip?"
+sensor:
+  - platform: wifi_signal
+    name: "BT Proxy WiFi Signal"
+    update_interval: 60s
+text_sensor:
+  - platform: wifi_info
+    ip_address:
+      name: "BT Proxy IP"

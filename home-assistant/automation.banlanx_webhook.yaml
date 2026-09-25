@@ -1,0 +1,46 @@
+# ── Garden room: BanlanX SP630E follows gardenroom.py ───────────────────────
+# The SP630E is Bluetooth-only (reached via the ESPHome BT proxy), so the
+# WLED script (gardenroom.py) can't drive it directly. gardenroom.py POSTs the current phase
+# from schedule.json here on every run, which keeps that file the only schedule.
+# Body: {"phase": str, "power": bool, "bri": 0-255, "kelvin": int}
+- id: garden_room_sp630e_schedule
+  alias: Garden room SP630E follows gardenroom.py
+  mode: restart
+  triggers:
+    - trigger: webhook
+      webhook_id: CHANGE-ME-to-a-long-random-id   # must match the url in ha_webhook.json
+      allowed_methods: [POST]
+      local_only: true
+  conditions:
+    - condition: template
+      value_template: "{{ states('light.sp630e_strip') not in ['unavailable', 'unknown'] }}"
+  actions:
+    - variables:
+        power: "{{ trigger.json.power | default(false) | bool and (trigger.json.bri | int(0)) > 0 }}"
+        bri: "{{ trigger.json.bri | int(0) }}"
+        kelvin: "{{ trigger.json.kelvin | int(4000) }}"
+        modes: "{{ state_attr('light.sp630e_strip', 'supported_color_modes') | default([], true) }}"
+        lo: "{{ state_attr('light.sp630e_strip', 'min_color_temp_kelvin') | int(2700) }}"
+        hi: "{{ state_attr('light.sp630e_strip', 'max_color_temp_kelvin') | int(6500) }}"
+    - choose:
+        - conditions: "{{ not power }}"
+          sequence:
+            - action: light.turn_off
+              target: {entity_id: light.sp630e_strip}
+              data: {transition: 1.4}
+        # Real CCT white — the reason these strips matter (the WLEDs only fake it).
+        - conditions: "{{ 'color_temp' in modes }}"
+          sequence:
+            - action: light.turn_on
+              target: {entity_id: light.sp630e_strip}
+              data:
+                brightness: "{{ bri }}"
+                color_temp_kelvin: "{{ [[kelvin, lo] | max, hi] | min }}"
+                transition: 1.4
+      # Mono white: brightness is all it has.
+      default:
+        - action: light.turn_on
+          target: {entity_id: light.sp630e_strip}
+          data:
+            brightness: "{{ bri }}"
+            transition: 1.4

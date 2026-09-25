@@ -1,0 +1,8 @@
+# /etc/cron.d/garden-room-lights
+# A dumb 10-minute tick: the script reads the wall clock and picks the phase itself,
+# so there are no cron times to re-tune when the clocks change.
+SHELL=/bin/bash
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+# GARDENROOM_ROUTER=root@192.168.1.1
+# GARDENROOM_ROUTER_KEY=/root/.ssh/router
+*/10 * * * * root /usr/bin/python3 /opt/garden-room-lights/gardenroom.py apply >> /var/log/garden-room-lights.log 2>&1

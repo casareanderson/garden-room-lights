@@ -1,0 +1,58 @@
+
+- id: room_lighting_schedule
+  alias: Room lighting — time of day
+  description: >-
+    Keeps every light in the scheduled areas at one colour and brightness that
+    tracks the time of day. Runs every 10 minutes rather than on phase
+    boundaries, so a light switched on mid-phase is brought into line within
+    ten minutes, and so there are no cron times to re-tune for DST.
+
+    Phase table matches schedule.json in this repo (keep the two in step if you edit one)
+    (EN 12464-1 for the task levels, Brown et al. 2020 for the circadian ramp).
+    Areas listed in `rooms` below are the only ones touched.
+
+    It only adjusts lights that are already ON — it never switches the house on.
+  mode: single
+  max_exceeded: silent
+  triggers:
+    - trigger: time_pattern
+      minutes: "/10"
+    - trigger: homeassistant
+      event: start
+  conditions:
+    - condition: state
+      entity_id: input_boolean.room_lighting_schedule
+      state: "on"
+  actions:
+    - variables:
+        rooms: ["office"]
+        mins: "{{ now().hour * 60 + now().minute }}"
+        phase: >-
+          {% set m = now().hour * 60 + now().minute %}
+          {% if   m <  390 %}{{ {'name':'off','k':2000,'b':0,'on':false} }}
+          {% elif m <  510 %}{{ {'name':'wake','k':3000,'b':90,'on':true} }}
+          {% elif m <  720 %}{{ {'name':'work','k':6000,'b':255,'on':true} }}
+          {% elif m <  840 %}{{ {'name':'midday','k':5000,'b':255,'on':true} }}
+          {% elif m < 1020 %}{{ {'name':'afternoon','k':4000,'b':230,'on':true} }}
+          {% elif m < 1170 %}{{ {'name':'winddown','k':3200,'b':170,'on':true} }}
+          {% elif m < 1350 %}{{ {'name':'evening','k':2700,'b':110,'on':true} }}
+          {% else %}{{ {'name':'night','k':2000,'b':40,'on':true} }}
+          {% endif %}
+    - repeat:
+        for_each: "{{ rooms }}"
+        sequence:
+          - choose:
+              - conditions: "{{ phase.on }}"
+                sequence:
+                  - action: script.apply_room_lighting
+                    data:
+                      area: "{{ repeat.item }}"
+                      kelvin: "{{ phase.k }}"
+                      brightness: "{{ phase.b }}"
+                      include_off: false
+            default:
+              - action: light.turn_off
+                target:
+                  entity_id: >-
+                    {{ area_entities(repeat.item) | select('match','light\.')
+                       | reject('search','_segment_') | list }}
