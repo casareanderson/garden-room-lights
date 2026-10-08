@@ -9,6 +9,17 @@ Time-of-day lighting for one room of cheap WLED strips, with brightness that res
 
 It comes from my own garden room (about 15 m², six WLED strips, one white strip), so it isn't a polished product. It works, and most of the value is in the things that took a while to find, written up below.
 
+## Contents
+
+- [What it does](#what-it-does)
+- [Screenshots](#screenshots)
+- [Quick start](#quick-start)
+- [Usage](#usage)
+- [Configuration](#configuration)
+- [How it works](#how-it-works)
+- [Status, limits and real results](#status-limits-and-real-results)
+- [Licence and credits](#licence-and-credits)
+
 ## What it does
 
 - Splits the day into phases in `schedule.json` (kelvin, brightness, on/off) and applies the one that matches the wall clock. A dumb 10-minute cron tick is enough, and nothing changes when the clocks go forward or back.
