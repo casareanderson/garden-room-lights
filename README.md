@@ -188,3 +188,5 @@ MIT, see [LICENSE](LICENSE).
 - [UniLED](https://github.com/monty68/uniled) by monty68 drives the BanlanX controller in HA. The patch in `patches/` is a note on how to fix it locally, not a fork.
 - Kelvin-to-RGB uses Tanner Helland's planckian approximation.
 - Schedule research sources (EN 12464-1, Brown et al. 2020 and others) are cited in [docs/research.md](docs/research.md).
+
+If this is useful to you, [buy me a coffee](https://buymeacoffee.com/iamc_tech) ☕
