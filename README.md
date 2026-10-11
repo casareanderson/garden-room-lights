@@ -46,6 +46,8 @@ It comes from my own garden room (about 15 m², six WLED strips, one white strip
 
 ## Quick start
 
+Full step-by-step guide, tested on a fresh machine every week: [docs/SETUP.md](docs/SETUP.md).
+
 You need Python 3 and at least one WLED unit on your network.
 
 ```bash
@@ -177,7 +179,7 @@ garden-room-lights/
 - **The before/after chart is an estimate** from WLED's ABL model, not a light-meter reading.
 - **How much light a room needs.** EN 12464-1 asks for about 300 lux for general use and 500 lux at a desk. In 15 m², with strips bouncing light off walls and ceiling, that is somewhere around 10,000 to 20,000 lumens installed. Six 300-LED WS2812B strips on 3 A supplies give roughly 1,200 to 1,800 lumens, about 25 to 40 lux. That is my estimate from WLED's own current figures, not a measurement. In other words the strips are mood lighting, and the working light has to come from real white LEDs. Measure yours with a phone lux app before trusting any of these numbers, mine included.
 - The router fallback assumes an OpenWrt-style `/tmp/dhcp.leases` reachable over SSH. Other routers need their own lookup.
-- The schedule follows the local wall clock in `schedule.json`'s `timezone` (`Europe/London` shipped). Motion, presence and daylight sensing are not part of this repo.
+- The schedule follows the machine's local clock. `schedule.json` carries a `timezone` key (`Europe/London` shipped), but the script doesn't read it yet, so set the machine's timezone. Motion, presence and daylight sensing are not part of this repo.
 - There are no automated tests.
 
 ## Licence and credits

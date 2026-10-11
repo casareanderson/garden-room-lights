@@ -1,0 +1,38 @@
+name: setup-check
+
+# Proves docs/SETUP.md still works from a fresh clone, against a fake WLED unit.
+# Runs weekly so a Python change shows up here before it shows up for a reader.
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "29 6 * * 1"
+  push:
+    paths:
+      - "docs/SETUP.md"
+      - "scripts/**"
+      - "gardenroom.py"
+      - "schedule.json"
+      - "*.example.json"
+      - ".github/workflows/setup-check.yml"
+  pull_request:
+    paths:
+      - "docs/SETUP.md"
+      - "scripts/**"
+      - "gardenroom.py"
+      - "schedule.json"
+
+permissions:
+  contents: read
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: ["3.10", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - run: bash scripts/setup-check.sh
