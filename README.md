@@ -6,6 +6,7 @@ Time-of-day lighting for one room of cheap WLED strips, with brightness that res
 
 [![Licence: MIT](https://img.shields.io/badge/licence-MIT-blue.svg)](LICENSE)
 ![Python 3, standard library only](https://img.shields.io/badge/python-3%20(stdlib%20only)-blue.svg)
+[![Buy Me a Coffee](https://raw.githubusercontent.com/casareanderson/.github/main/badges/bmc-yellow.svg)](https://buymeacoffee.com/iamc_tech)
 
 It comes from my own garden room (about 15 m², six WLED strips, one white strip), so it isn't a polished product. It works, and most of the value is in the things that took a while to find, written up below.
 
