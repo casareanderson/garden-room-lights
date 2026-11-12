@@ -193,3 +193,7 @@ MIT, see [LICENSE](LICENSE).
 - Schedule research sources (EN 12464-1, Brown et al. 2020 and others) are cited in [docs/research.md](docs/research.md).
 
 If this is useful to you, [buy me a coffee](https://buymeacoffee.com/iamc_tech) ☕
+
+---
+
+More homelab field notes: https://iamtech.cn1-lab.uk
